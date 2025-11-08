@@ -1,0 +1,85 @@
+openapi: 3.1.0
+info:
+  title: Scheduler API
+  version: 0.0.1
+  description: API for the Scheduler application
+servers:
+  - url: http://localhost:7540/api
+    description: Local development
+tags:
+  - name: Task
+    description: Task operations
+paths:
+  /task:
+    post:
+      summary: Создать задачу
+      description: Создает новую задачу и возвращает её ID
+      tags: [Task]
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:  
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201': { $ref: '#/components/responses/Created' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+components:
+  schemas:
+    CreateTaskRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        date:
+          type: string
+          description: Дата задачи в формате YYYYMMDD
+          pattern: ^[0-9]{8}$
+          example: "20250115"
+        title:
+          type: string
+          description: Заголовок задачи
+          minLength: 1
+          maxLength: 128
+        comment:
+          type: string
+          description: Комментарий к задаче
+        repeat:
+          type: string
+          description: "Правило повторения: 'd N' (каждые N дней) или 'y' (ежегодно)"
+          example: "d 7"
+      required:
+        - title
+    CreateTaskResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID задачи
+      required:
+        - id
+    Problem:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Ошибка
+        message:
+          type: string
+          description: Сообщение об ошибке
+  responses:
+    BadRequest:
+      description: Неверный JSON/структура запроса
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    InternalServerError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Created:
+      description: Задача успешно создана
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/CreateTaskResponse' }
