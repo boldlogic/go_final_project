@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.0
 info:
   title: Scheduler API
   version: 0.0.1
@@ -6,35 +6,74 @@ info:
 servers:
   - url: http://localhost:7540/api
     description: Local development
+    
 tags:
   - name: Task
     description: Task operations
+    
 paths:
   /task:
     post:
+      operationId: apiPostTask
       summary: Создать задачу
       description: Создает новую задачу и возвращает её ID
       tags: [Task]
       requestBody:
         required: true
-        content: 
+        content:
           application/json:
-            schema:  
+            schema:
               $ref: '#/components/schemas/CreateTaskRequest'
       responses:
-        '201': { $ref: '#/components/responses/Created' }
-        '400': { $ref: '#/components/responses/BadRequest' }
-        '500': { $ref: '#/components/responses/InternalServerError' }
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Получить задачу по ИД
+      description: Возвращает свойства задачи по ИД
+      tags: [Task]
+      parameters:
+        - name: id
+          in: query
+          description: Фильтр по имени (contains)
+          schema: { type: string}
+      responses:
+        '200':
+          $ref: '#/components/responses/TaskOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+          
+  /tasks:
+    get:
+      operationId: apiGetTasks
+      summary: Получить список задач
+      description: Возвращает массив задач
+      tags: [Task]
+      responses:
+        '200':
+          $ref: '#/components/responses/TasksOK'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+          
 components:
   schemas:
+  
     CreateTaskRequest:
       type: object
       additionalProperties: false
+      required: [title]
       properties:
         date:
           type: string
           description: Дата задачи в формате YYYYMMDD
-          pattern: ^[0-9]{8}$
+          pattern: '^[0-9]{8}$'
           example: "20250115"
         title:
           type: string
@@ -48,18 +87,20 @@ components:
           type: string
           description: "Правило повторения: 'd N' (каждые N дней) или 'y' (ежегодно)"
           example: "d 7"
-      required:
-        - title
+          
     CreateTaskResponse:
       type: object
+      additionalProperties: false
+      required: [id]
       properties:
         id:
           type: integer
           description: ID задачи
-      required:
-        - id
+          example: 123
+          
     Problem:
       type: object
+      additionalProperties: false
       properties:
         error:
           type: string
@@ -67,19 +108,74 @@ components:
         message:
           type: string
           description: Сообщение об ошибке
+          
+    Task:
+      type: object
+      additionalProperties: false
+      required: [id, title]
+      properties:
+        id:
+          type: string
+          description: ID задачи
+          example: "123"
+        date: 
+          type: string
+          description: Дата задачи в формате YYYYMMDD
+          pattern: '^[0-9]{8}$'
+          example: "20250115"
+        title:
+          type: string
+          description: Заголовок задачи
+        comment:
+          type: string
+          description: Комментарий к задаче
+        repeat:
+          type: string
+          description: Правило повторения задачи
+          
+    GetTasks:
+      type: object
+      additionalProperties: false
+      required: [tasks]
+      properties:
+        tasks:
+          type: array
+          description: Массив задач
+          items:
+            $ref: '#/components/schemas/Task'
+            
   responses:
+  
     BadRequest:
       description: Неверный JSON/структура запроса
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Problem' }
+          
     InternalServerError:
       description: Внутренняя ошибка сервера
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Problem' }
+          
     Created:
       description: Задача успешно создана
+    
+    NotFound:
+      description: Ресурс не найден
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/CreateTaskResponse' }
+          schema: { $ref: '#/components/schemas/Problem' }
+
+    TasksOK:
+      description: Успешное получение списка задач
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/GetTasks' }
+          
+    TaskOK:
+      description: Успешное получение задачи
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Task' }
+

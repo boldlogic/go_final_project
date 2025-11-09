@@ -54,7 +54,7 @@ func (h *Handler) apiGetTask(w http.ResponseWriter, r *http.Request) {
 
 	h.log.Infof("Задача с ID %d получена", id)
 	h.SendResponse(w, models.APIResponse{
-		StatusCode: http.StatusCreated,
+		StatusCode: http.StatusOK,
 		Body: models.Task{
 			ID:      task.ID,
 			Date:    task.Date,

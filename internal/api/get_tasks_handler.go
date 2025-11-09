@@ -46,7 +46,7 @@ func (h *Handler) apiGetTasks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.SendResponse(w, models.APIResponse{
-		StatusCode: http.StatusCreated,
+		StatusCode: http.StatusOK,
 		Body: models.TasksResp{
 			Tasks: resp,
 		},
