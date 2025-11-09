@@ -38,8 +38,12 @@ paths:
       parameters:
         - name: id
           in: query
-          description: Фильтр по имени (contains)
-          schema: { type: string}
+          description: Фильтр по ID задачи
+          required: true
+          schema: 
+            type: string
+            pattern: '^[1-9][0-9]*$'
+            example: "123"
       responses:
         '200':
           $ref: '#/components/responses/TaskOK'
@@ -47,7 +51,47 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
-          
+    put:
+      summary: Изменить задачу
+      description: Изменяет задачу
+      tags: [Task]
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Task'
+      responses:
+        '200':
+          $ref: '#/components/responses/TaskOK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'        
+        '404':
+          $ref: '#/components/responses/NotFound' 
+    delete:
+      summary: Удалить задачу по ИД
+      description: Удаляет задачу по ИД
+      tags: [Task]
+      parameters:
+        - name: id
+          in: query
+          description: Фильтр по ID задачи
+          required: true
+          schema: 
+            type: string
+            pattern: '^[1-9][0-9]*$'
+            example: "123"
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyRespOk'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'        
+        '404':
+          $ref: '#/components/responses/NotFound'   
   /tasks:
     get:
       operationId: apiGetTasks
@@ -143,6 +187,8 @@ components:
           description: Массив задач
           items:
             $ref: '#/components/schemas/Task'
+  
+      
             
   responses:
   
@@ -172,7 +218,12 @@ components:
       content:
         application/json:
           schema: { $ref: '#/components/schemas/GetTasks' }
-          
+    EmptyRespOk:
+      description: успешное удаление задачи
+      content:
+        application/json: 
+          {}
+      
     TaskOK:
       description: Успешное получение задачи
       content:
